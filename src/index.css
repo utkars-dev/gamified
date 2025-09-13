@@ -1,0 +1,16 @@
+
+
+:root {
+  --bg: #f6fff6;
+  --card: #ffffff;
+  --accent: #27a745;
+  --muted: #6b7280;
+}
+
+body {
+  margin: 0;
+  font-family: Inter, system-ui, Arial, sans-serif;
+  background: var(--bg);
+  color: #111827;
+}
+button { cursor: pointer; }
