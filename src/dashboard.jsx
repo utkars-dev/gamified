@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import {
   Search, User, Award, Activity, XCircle, Mail, Phone, MapPin, TrendingUp,
   Users, BookOpen, Trophy, Star, ChevronRight, Clock, CheckCircle, Play, Zap, Leaf,
-  Home, Settings, BarChart3, HelpCircle, Trees, Heart, MessageCircle, Share2
+  Home, Settings, BarChart3, HelpCircle, Trees, Heart, MessageCircle, Share2, Send
 } from 'lucide-react';
 import {
   LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer,
@@ -243,6 +243,22 @@ const App = () => {
     const interval = setInterval(nextStory, 10000);
     return () => clearInterval(interval);
   },);
+
+  // Chatbot state and handlers (non-intrusive, bottom-left)
+  const [isChatOpen, setIsChatOpen] = useState(false);
+  const [chatInput, setChatInput] = useState('');
+  const [chatMessages, setChatMessages] = useState([
+    { role: 'bot', text: 'Hi! I’m EcoBot 🌿 How can I help you today?' }
+  ]);
+  const handleSend = () => {
+    const trimmed = chatInput.trim();
+    if (!trimmed) return;
+    setChatMessages(prev => [...prev, { role: 'user', text: trimmed }]);
+    setChatInput('');
+    setTimeout(() => {
+      setChatMessages(prev => [...prev, { role: 'bot', text: 'Thanks! I’ll get back with eco tips shortly. 💚' }]);
+    }, 500);
+  };
 
   const StoryModule = () => {
     const currentStory = environmentalStories[currentStoryIndex];
@@ -729,7 +745,89 @@ const App = () => {
     </div>
   );
 
-  return <DashboardLayout />;
+  return (
+    <>
+      <DashboardLayout />
+      {/* AI Chatbot – fixed bottom-left, non-intrusive and responsive */}
+      <div className="fixed bottom-4 left-4 z-50">
+        {/* Chat window */}
+        <div
+          className={`origin-bottom-left transition-all duration-300 ease-out ${
+            isChatOpen ? 'opacity-100 translate-y-0 pointer-events-auto' : 'opacity-0 translate-y-4 pointer-events-none'
+          }`}
+        >
+          <div
+            className="w-80 md:w-96 rounded-2xl shadow-2xl border"
+            style={{ backgroundColor: '#0A192F', borderColor: 'rgba(0,255,136,0.25)' }}
+          >
+            {/* Header */}
+            <div className="flex items-center justify-between px-4 py-3 border-b" style={{ borderColor: 'rgba(255,255,255,0.08)' }}>
+              <div className="flex items-center space-x-2">
+                <div className="w-2.5 h-2.5 rounded-full" style={{ backgroundColor: '#00FF88', boxShadow: '0 0 10px rgba(0,255,136,0.6)' }} />
+                <span className="text-sm font-semibold text-white">EcoBot</span>
+              </div>
+              <button
+                onClick={() => setIsChatOpen(false)}
+                className="p-2 rounded-full hover:scale-110 transition-transform"
+                aria-label="Close chat"
+                style={{ color: '#00FF88' }}
+              >
+                ✕
+              </button>
+            </div>
+
+            {/* Messages */}
+            <div className="max-h-80 overflow-y-auto px-3 py-3 space-y-3">
+              {chatMessages.map((m, i) => (
+                <div key={i} className={`flex ${m.role === 'user' ? 'justify-end' : 'justify-start'}`}>
+                  <div
+                    className="max-w-[80%] rounded-2xl px-3 py-2 text-sm leading-relaxed shadow-md text-white"
+                    style={
+                      m.role === 'user'
+                        ? { background: 'linear-gradient(90deg, #00B050 0%, #00FF88 100%)', boxShadow: '0 0 12px rgba(0,255,136,0.25)' }
+                        : { backgroundColor: '#0A192F', border: '1px solid rgba(0,255,136,0.25)', boxShadow: '0 0 12px rgba(0,255,136,0.12)' }
+                    }
+                  >
+                    {m.text}
+                  </div>
+                </div>
+              ))}
+            </div>
+
+            {/* Input */}
+            <div className="flex items-center gap-2 px-3 pb-3">
+              <input
+                value={chatInput}
+                onChange={(e) => setChatInput(e.target.value)}
+                onKeyDown={(e) => { if (e.key === 'Enter') handleSend(); }}
+                className="flex-1 rounded-xl px-3 py-2 text-sm outline-none placeholder-white/60"
+                style={{ backgroundColor: 'rgba(255,255,255,0.06)', color: '#FFFFFF', border: '1px solid rgba(255,255,255,0.08)' }}
+                placeholder="Type your message..."
+              />
+              <button
+                onClick={handleSend}
+                className="p-2 rounded-xl transition-all duration-300 hover:scale-110"
+                aria-label="Send"
+                style={{ background: 'linear-gradient(90deg, #00B050 0%, #00FF88 100%)', color: '#0A192F', boxShadow: '0 0 18px rgba(0,255,136,0.45)' }}
+              >
+                <Send className="w-4 h-4" />
+              </button>
+            </div>
+          </div>
+        </div>
+
+        {/* Floating chatbot button */}
+        <button
+          onClick={() => setIsChatOpen((v) => !v)}
+          className="w-14 h-14 rounded-full flex items-center justify-center shadow-2xl transition-all duration-300 hover:scale-110"
+          aria-label="Open chat"
+          style={{ backgroundColor: '#00FF88', color: '#0A192F', boxShadow: '0 0 25px rgba(0,255,136,0.5)' }}
+        >
+          <MessageCircle className="w-7 h-7 text-white" />
+        </button>
+      </div>
+    </>
+  );
 };
 
 export default App;
